@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import _json as json
+import ujson as json
 import struct
 import binascii
 import datetime

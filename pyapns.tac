@@ -8,15 +8,16 @@ config_file = '/path/to/config/pyapns_conf.json'
 import twisted.application, twisted.web, twisted.application.internet
 from twisted.python.logfile import LogFile
 from twisted.python.log import ILogObserver, FileLogObserver
-import pyapns.server, pyapns._json
+import pyapns.server
 import pyapns.rest_service, pyapns.model
 import os
+import ujson as json
 
 config = {}
 
 if os.path.exists(os.path.abspath(config_file)):
     with open(os.path.abspath(config_file)) as f:
-        config.update(pyapns._json.loads(f.read()))
+        config.update(json.loads(f.read()))
 else:
     print 'No config file loaded. Alter the `config_file` variable at', \
           'the top of this file to set one.'
