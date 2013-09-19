@@ -4,7 +4,7 @@ import httplib
 import functools
 from sys import hexversion
 import requests
-from pyapns import _json as json
+import ujson as json
 from pyapns.model import Notification, DisconnectionEvent
 
 

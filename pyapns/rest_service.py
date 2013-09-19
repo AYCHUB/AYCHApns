@@ -3,7 +3,7 @@ from twisted.web.resource import Resource, NoResource
 from twisted.web.server import NOT_DONE_YET
 from twisted.python import log
 from pyapns.model import AppRegistry, NoSuchAppException, Notification
-from pyapns import _json as json
+import ujson as json
 
 
 PRODUCTION = 'production'

@@ -3,7 +3,7 @@ import datetime
 import calendar
 from collections import defaultdict, deque
 from pyapns.server import APNSService, decode_feedback
-from pyapns import _json as json
+import ujson as json
 
 
 class NoSuchAppException(Exception):
@@ -232,9 +232,8 @@ class Notification(object):
                     'token "{}" could not be decoded: {}'.format(str(t), str(e)
                 ))
 
-        encoded_payload = json.dumps(self.payload, separators=(',', ':'),
-                                     ensure_ascii=False).encode('utf-8')
-        return structify(binaryify(self.token), self.internal_identifier, 
+        encoded_payload = json.dumps(self.payload, ensure_ascii=False)
+        return structify(binaryify(self.token), self.internal_identifier,
                          self.expiry, encoded_payload)
 
     def __repr__(self):
