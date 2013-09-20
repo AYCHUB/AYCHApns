@@ -83,7 +83,7 @@ class APNSProtocol(Protocol):
         return self.transport.write(msg)
 
     def dataReceived(self, data):
-        log.msg('data received after sendMessage data=%s' % data)
+        log.msg('data received after sendMessage data=%s' % binascii.hexlify(data))
         if callable(self.onFailureReceived):
             self.onFailureReceived(data)
 

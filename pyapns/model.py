@@ -176,6 +176,15 @@ def encode_notifications(notifications):
     return ''.join([n.to_apn_wire_format() for n in notifications])
 
 
+def binaryify(t):
+    try:
+        return t.decode('hex')
+    except TypeError, e:
+        raise ValueError(
+            'token "{}" could not be decoded: {}'.format(str(t), str(e)
+        ))
+
+
 class Notification(object):
     """
     A single notification being sent to the APN service.
@@ -220,21 +229,24 @@ class Notification(object):
         }
 
     def to_apn_wire_format(self):
-        fmt = '!BLLH32sH%ds'
-        structify = lambda t, i, e, p: struct.pack(fmt % len(p), 1, i, e, 32, 
-                                                   t, len(p), p)
-        binaryify = lambda t: t.decode('hex')
-        def binaryify(t):
-            try:
-                return t.decode('hex')
-            except TypeError, e:
-                raise ValueError(
-                    'token "{}" could not be decoded: {}'.format(str(t), str(e)
-                ))
+        frame_fmt = '!BI%ds'
+        item_fmt = '!BH%s'
 
+        # must be utf-8 encoded
         encoded_payload = json.dumps(self.payload, ensure_ascii=False)
-        return structify(binaryify(self.token), self.internal_identifier,
-                         self.expiry, encoded_payload)
+
+        items = {
+            # item number -> (item struct, value)
+            1: ('32s', binaryify(self.token)),
+            2: ('%ds' % len(encoded_payload), encoded_payload),
+            3: ('I', self.internal_identifier),
+            4: ('I', self.expiry),
+            5: ('B', 10),  #  send immediately
+        }
+
+        items_packed = ''.join(struct.pack(item_fmt % struct_str, num, struct.calcsize(struct_str), val) for num, (struct_str, val) in items.iteritems())
+        items_length = len(items_packed)
+        return struct.pack(frame_fmt % items_length, 2, items_length, items_packed)
 
     def __repr__(self):
         return u'<Notification token={} identifier={} expiry={} payload={}>'.format(
